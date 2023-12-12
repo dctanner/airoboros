@@ -1032,12 +1032,8 @@ class SelfInstructor:
         self.outfile = open(self.output_path, "a+")
         started_at = datetime.datetime.now()
         try:
-            tasks = [
-                asyncio.create_task(self.run_instructor(category, method_map))
-                for category in self.instructors
-            ]
-            for task in tasks:
-                await task
+            for category in self.instructors:
+                await self.run_instructor(category, method_map)
         finally:
             self.outfile.close()
 
@@ -1062,22 +1058,13 @@ class SelfInstructor:
             method_map["stylized_response"] = stylized_response_generator
             method_map["gtkm"] = gtkm_generator
             self.outfile = open(self.output_path, "a+")
-            tasks = []
             try:
-                tasks.append(
-                    asyncio.create_task(
-                        self.run_instructor(
-                            "stylized_response",
-                            method_map,
-                            existing=existing,
-                        )
-                    )
+                await self.run_instructor(
+                    "stylized_response",
+                    method_map,
+                    existing=existing,
                 )
-                tasks.append(
-                    asyncio.create_task(self.run_instructor("gtkm", method_map))
-                )
-                for task in tasks:
-                    await task
+                await self.run_instructor("gtkm", method_map)
             finally:
                 self.outfile.close()
 
