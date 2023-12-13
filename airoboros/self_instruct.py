@@ -573,7 +573,7 @@ class SelfInstructor:
                 return None
         return text.strip()
 
-    async def generate_response_openai(self, instruction: str, **kwargs) -> str:
+    async def generate_chat_response_openai(self, instruction: str, **kwargs) -> str:
         """Call the model endpoint with the specified instruction and return the text response.
 
         :param instruction: The instruction to respond to.
@@ -612,11 +612,46 @@ class SelfInstructor:
                 return None
         return text
 
+    async def generate_completion_response_openai(self, instruction: str, **kwargs) -> str:
+        """Call the legacy completion endpoint with the specified instruction and return the text response.
+
+        :param instruction: The instruction to respond to.
+        :type instruction: str
+
+        :return: Response text.
+        :rtype: str
+        """
+        filter_response = kwargs.pop("filter_response", True)
+        model = kwargs.get("model", self.model)
+        path = "/completion"
+        payload = {**kwargs}
+        if "model" not in payload:
+            payload["model"] = model
+        payload["prompt"] = instruction
+        response = await self._post_no_exc_openai(path, payload)
+        if (
+            not response
+            or not response.get("choices")
+            or response["choices"][0]["finish_reason"] == "length"
+        ):
+            return None
+        text = response["choices"][0]["text"]
+
+        if filter_response:
+            for banned in self.response_filters:
+                if banned.search(text, re.I):
+                    logger.warning(f"Banned response [{banned}]: {text}")
+                    return None
+            if text.startswith(("I'm sorry,", "Apologies,", "I can't", "I won't")):
+                logger.warning(f"Banned response [apology]: {text}")
+                return None
+        return text
+
     async def generate_response(self, instruction: str, **kwargs) -> str:
         """Generate a response - wrapper around the openai/vertexai methods above."""
         model = kwargs.pop("model", None) or self.model
         if model in OPENAI_MODELS:
-            return await self.generate_response_openai(instruction, **kwargs)
+            return await self.generate_completion_response_openai(instruction, **kwargs)
         return await self.generate_response_vertexai(instruction, **kwargs)
 
     async def is_decent_response(self, item):
