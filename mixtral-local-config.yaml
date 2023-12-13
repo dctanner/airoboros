@@ -232,7 +232,9 @@ instructors:
   ##################################################################################
   # Trivia tasks.
   trivia:
-    count: 100
+    api_params:
+      temperature: 0.6
+    count: 38
     batch_size: 20
     min_docsearch_score: 0.035
     prompt_path: trivia.txt

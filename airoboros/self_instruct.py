@@ -592,6 +592,7 @@ class SelfInstructor:
         payload["messages"] = messages
         if instruction:
             payload["messages"].append({"role": "user", "content": instruction})
+        print(payload)
         response = await self._post_no_exc_openai(path, payload)
         if (
             not response
