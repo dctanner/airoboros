@@ -2,6 +2,14 @@ import asyncio
 import re
 import random
 
+async def limit_concurrency(aws, limit):
+    semaphore = asyncio.Semaphore(limit)
+
+    async def wrapper(aw):
+        async with semaphore:
+            return await aw
+
+    return asyncio.gather(*map(wrapper, aws))
 
 async def generate(instructor, **kwargs):
     """Generator for coding training data."""
@@ -111,7 +119,8 @@ async def generate(instructor, **kwargs):
             )
         if not futures:
             continue
-        responses = await asyncio.gather(*futures)
+        # responses = await asyncio.gather(*futures)
+        responses = await limit_concurrency(futures, 1)
         for idx in range(len(futures)):
             response = responses[idx]
             if not response:
