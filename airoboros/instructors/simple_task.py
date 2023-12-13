@@ -123,7 +123,7 @@ async def generate(
                 )
         if not futures:
             continue
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         for idx in range(len(responses)):
             response = responses[idx]
             if not response or not response.strip():

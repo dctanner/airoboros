@@ -51,7 +51,7 @@ async def generate(instructor, **kwargs):
         )
         if len(futures) < batch_size:
             continue
-        for response in await asyncio.gather(*futures):
+        for response in await instructor.gather_with_concurrency(instructor.api_concurrency, *futures):
             if not response or not response.strip():
                 continue
 

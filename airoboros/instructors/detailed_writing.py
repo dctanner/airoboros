@@ -118,7 +118,7 @@ async def generate(instructor, **kwargs):
         # Once we have batch_size instruction prompts, we can generate responses,
         # which are the actual instructions.
         instructions = []
-        for instruction in await asyncio.gather(*futures):
+        for instruction in await instructor.gather_with_concurrency(instructor.api_concurrency, *futures):
             if not instruction or not instruction.strip():
                 continue
             if await instructor.is_too_similar(instruction, min_score=min_score):
@@ -146,7 +146,7 @@ async def generate(instructor, **kwargs):
             )
             for instruction in partitioned_instructions
         ]
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
 
         # Generate the second part of the response.
         messages = []
@@ -183,7 +183,7 @@ async def generate(instructor, **kwargs):
             continue
 
         # Generate the final section of the response.
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         messages_final = []
         futures = []
         successful_instructions = []
@@ -217,7 +217,7 @@ async def generate(instructor, **kwargs):
             )
         if not futures:
             continue
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
 
         # Now put everything together.
         fluid_instructions = []
@@ -246,7 +246,7 @@ async def generate(instructor, **kwargs):
             )
         if not futures:
             continue
-        fluid_responses = await asyncio.gather(*futures)
+        fluid_responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         for idx in range(len(futures)):
             if not fluid_responses[idx] or not fluid_responses[idx].strip():
                 continue

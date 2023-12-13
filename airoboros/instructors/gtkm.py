@@ -111,7 +111,7 @@ async def generate(instructor, **kwargs):
                     **api_params,
                 )
             )
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         user, assistant = [], []
         for idx in range(len(futures)):
             if not responses[idx] or not responses[idx].strip():

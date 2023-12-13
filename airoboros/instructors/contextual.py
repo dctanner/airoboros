@@ -201,7 +201,7 @@ async def generate(instructor, **kwargs):
         if len(futures) < batch_size:
             continue
         instructions = []
-        for instruction in await asyncio.gather(*futures):
+        for instruction in await instructor.gather_with_concurrency(instructor.api_concurrency, *futures):
             if not instruction or not instruction.strip():
                 continue
             if not VALID_FORMAT.match(instruction):
@@ -226,7 +226,7 @@ async def generate(instructor, **kwargs):
             )
             for instruction in instructions
         ]
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         for idx in range(len(futures)):
             response = responses[idx]
             if not response or not response.strip():

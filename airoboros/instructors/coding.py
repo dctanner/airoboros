@@ -110,8 +110,7 @@ async def generate(instructor, **kwargs):
             )
         if not futures:
             continue
-        print(instructor.api_concurrency)
-        responses = await instructor.gather_with_concurrency(1, *futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         for idx in range(len(futures)):
             response = responses[idx]
             if not response:

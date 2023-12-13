@@ -99,7 +99,7 @@ async def generate(instructor, existing=[], **kwargs):
             )
         if instructions and len(futures) < batch_size:
             continue
-        responses = await asyncio.gather(*futures)
+        responses = await instructor.gather_with_concurrency(instructor.api_concurrency, *futures)
         for idx in range(len(futures)):
             logger.success(f"Generated stylized response as: {batch_names[idx]}")
             if not responses[idx] or "SKIP" in responses[idx]:
