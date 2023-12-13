@@ -205,6 +205,7 @@ async def generate(instructor, **kwargs):
             if not instruction or not instruction.strip():
                 continue
             if not VALID_FORMAT.match(instruction):
+                logger.warning(instruction)
                 logger.warning("Skipping contextual prompt, invalid format.")
                 continue
             if await instructor.is_too_similar(instruction, min_score=min_score):
