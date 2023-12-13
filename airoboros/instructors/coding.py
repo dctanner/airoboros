@@ -110,16 +110,8 @@ async def generate(instructor, **kwargs):
             )
         if not futures:
             continue
-        async def gather_with_concurrency(n, *tasks):
-            semaphore = asyncio.Semaphore(n)
-
-            async def sem_task(task):
-                async with semaphore:
-                    return await task
-
-            return await asyncio.gather(*(sem_task(task) for task in tasks))
-
-        responses = await gather_with_concurrency(1, *futures)
+        print(instructor.api_concurrency)
+        responses = await instructor.gather_with_concurrency(1, *futures)
         for idx in range(len(futures)):
             response = responses[idx]
             if not response:

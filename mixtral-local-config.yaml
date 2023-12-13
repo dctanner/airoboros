@@ -10,6 +10,8 @@ model: "models/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf"
 # OpenAI API key (if null, uses environment variable OPENAI_API_KEY)
 openai_api_key: "abc"
 
+api_concurrency: 1
+
 # TODO: Overwrite OpenAI API url with local compatible server like llama.cpp server or vllm
 # openai_api_base_url: "http://aibox:8888"
 

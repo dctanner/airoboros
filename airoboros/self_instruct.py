@@ -141,6 +141,7 @@ class SelfInstructor:
         )
         self.topic_request_count = int(raw_config.get("topic_request_count") or 20)
         self.default_count = 100
+        self.api_concurrency = int(raw_config.get("api_concurrency") or 10)
         if raw_config.get("default_count") is not None:
             self.default_count = int(raw_config["default_count"])
         self.default_batch_size = 5
@@ -341,6 +342,16 @@ class SelfInstructor:
             )
         with open(path) as infile:
             return infile.read()
+
+    @staticmethod
+    async def gather_with_concurrency(n, *tasks):
+        semaphore = asyncio.Semaphore(n)
+
+        async def sem_task(task):
+            async with semaphore:
+                return await task
+
+        return await asyncio.gather(*(sem_task(task) for task in tasks))
 
     def get_vertexai_token(self):
         if self._vertexai_token and self._vertexai_token_date > time() - 300:
